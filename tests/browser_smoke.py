@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 API = {
- 'ui_contract':'family-v1', 'as_of':'2026-11-15',
+ 'ui_contract':'firestore-v2', 'as_of':'2026-11-15',
  'summary':{'total':2,'areas':1,'completions':1},
  'family_enabled':True,'family_configured':True,'member':'Ida','planner':'Ida',
  'assigned':{'T001':'Husband'}, 'requests':[],
@@ -16,11 +16,11 @@ API = {
    {'id':'T001','name':'Clean sink','area':'Kitchen','priority':'High','status':'Suggested today',
     'next_suggested':'2026-11-15','last_completed':'2026-11-08','assigned_to':'Husband','pending_for':[],
     'attributes':{'estimated_minutes':5,'physical_effort':'Low','mental_effort':'Low','age_suitability':'All ages'},
-    'views':{'todo':True,'daily':False,'weekly':False,'monthly':False,'quarterly':False,'yearly':False,'as_needed':False}},
+    'frequency_days':7,'views':{'todo':True,'daily':False,'weekly':False,'monthly':False,'quarterly':False,'yearly':False,'as_needed':False}},
    {'id':'T002','name':'Mop floor','area':'Kitchen','priority':'Routine','status':'Upcoming',
     'next_suggested':'2026-11-29','last_completed':'2026-11-15','assigned_to':None,'pending_for':[],
     'attributes':{'estimated_minutes':15,'physical_effort':'Medium','mental_effort':'Low','age_suitability':'Adults only'},
-    'views':{'todo':False,'daily':False,'weekly':True,'monthly':False,'quarterly':False,'yearly':False,'as_needed':False}}
+    'frequency_days':14,'views':{'todo':False,'daily':False,'weekly':True,'monthly':False,'quarterly':False,'yearly':False,'as_needed':False}}
  ]
 }
 try:
@@ -35,10 +35,11 @@ try:
   html=html.replace('</body>', '<script>'+(ROOT/'static/app.js').read_text()+'</script></body>')
   page.set_content(html)
   page.wait_for_timeout(400)
-  assert page.locator('#tab-heading').inner_text()=='To Do'
+  assert page.locator('#tab-heading').inner_text()=='Daily chores'
   assert page.locator('#chore-list').get_by_text('Clean sink').count()==0, 'assigned chore is not To Do'
-  page.locator('button[data-view=weekly]').click()
-  assert page.locator('#tab-heading').inner_text()=='Completed Weekly'
+  page.locator('button[data-frequency=biweekly]').click()
+  page.locator('button[data-tracker-status=completed]').click()
+  assert page.locator('#tab-heading').inner_text()=='Biweekly chores'
   assert page.locator('#chore-list').get_by_text('Mop floor').count()==1
   assert page.locator('#family-summary').count()==1
   browser.close()

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f7f8f4">
 <title>Household Companion</title>
-<link rel="stylesheet" href="/static/styles.css?v=2.4.0">
-<script src="/static/app.js?v=2.4.0" defer></script>
+<link rel="stylesheet" href="/static/styles.css?v=2.4.1">
+<script src="/static/app.js?v=2.4.1" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -57,17 +57,20 @@
   </form>
  </div>
 </section>
-<section class="card tasks"><div class="section-heading"><div><div class="eyebrow">YOUR TRACKER</div><h2 id="tab-heading">To Do</h2></div><p id="count"></p></div>
-<nav class="tracker-tabs" id="tracker-tabs" aria-label="Household chore views">
- <button type="button" class="tab active" data-view="todo" aria-pressed="true">To Do <span data-tab-count="todo"></span></button>
- <button type="button" class="tab" data-view="daily" aria-pressed="false">Completed Daily <span data-tab-count="daily"></span></button>
- <button type="button" class="tab" data-view="weekly" aria-pressed="false">Completed Weekly <span data-tab-count="weekly"></span></button>
- <button type="button" class="tab" data-view="monthly" aria-pressed="false">Completed Monthly <span data-tab-count="monthly"></span></button>
- <button type="button" class="tab" data-view="quarterly" aria-pressed="false">Completed Quarterly <span data-tab-count="quarterly"></span></button>
- <button type="button" class="tab" data-view="yearly" aria-pressed="false">Completed Yearly <span data-tab-count="yearly"></span></button>
- <button type="button" class="tab" data-view="as_needed" aria-pressed="false">Completed As Needed <span data-tab-count="as_needed"></span></button>
+<section class="card tasks"><div class="section-heading"><div><div class="eyebrow">YOUR TRACKER</div><h2 id="tab-heading">Daily chores</h2></div><p id="count"></p></div>
+<nav class="tracker-tabs" id="tracker-tabs" aria-label="Chore frequency">
+ <button type="button" class="tab active" data-frequency="daily" aria-pressed="true">Daily <span data-tab-count="daily"></span></button>
+ <button type="button" class="tab" data-frequency="weekly" aria-pressed="false">Weekly <span data-tab-count="weekly"></span></button>
+ <button type="button" class="tab" data-frequency="biweekly" aria-pressed="false">Biweekly <span data-tab-count="biweekly"></span></button>
+ <button type="button" class="tab" data-frequency="monthly" aria-pressed="false">Monthly <span data-tab-count="monthly"></span></button>
+ <button type="button" class="tab" data-frequency="occasional" aria-pressed="false">Occasional <span data-tab-count="occasional"></span></button>
+ <button type="button" class="tab" data-frequency="as_needed" aria-pressed="false">As Needed <span data-tab-count="as_needed"></span></button>
 </nav>
-<p id="tab-explanation" class="tab-explanation">Chores never recorded or ready again today. Completed chores appear in one frequency-based tab until their next suggested date.</p>
+<div id="tracker-status" class="tracker-status" role="group" aria-label="Chore completion status">
+ <button type="button" class="active" data-tracker-status="todo" aria-pressed="true">To Do</button>
+ <button type="button" data-tracker-status="completed" aria-pressed="false">Completed</button>
+</div>
+<p id="tab-explanation" class="tab-explanation">Everyday chores, organized by whether they are ready or completed.</p>
 <div class="filters"><input id="search" type="search" placeholder="Search chores…" aria-label="Search chores"><select id="area" aria-label="Filter area"><option value="">All areas</option></select><select id="status" aria-label="Filter status"><option value="">All statuses</option><option>Overdue</option><option>Suggested today</option><option>Upcoming</option><option>Not established</option><option>As needed</option></select></div>
 
 <div id="chore-list" class="chore-list" aria-live="polite"><p class="quiet">Loading chores…</p></div></section>

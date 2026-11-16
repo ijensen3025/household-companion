@@ -33,3 +33,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .manage-form label input,.manage-form label select{width:100%;min-width:0}
 .manage-form button{justify-self:start}
 @media(max-width:760px){.management-grid{grid-template-columns:1fr}.manage-form{grid-template-columns:1fr}}
+
+/* Frequency-first tracker: each frequency has its own To Do / Completed filter. */
+.tracker-status{display:flex;gap:8px;margin:18px 0 4px;flex-wrap:wrap}
+.tracker-status button{border:1px solid #d5e2d4;border-radius:10px;padding:9px 17px;background:#fff;color:#496650;font-size:13px;font-weight:700}
+.tracker-status button.active{background:#dcebdd;color:#245a37;border-color:#8fb29b}
+.tracker-status button:focus-visible{outline:3px solid #5b9973;outline-offset:2px}

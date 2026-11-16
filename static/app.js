@@ -1,17 +1,29 @@
 let familyEnabled=false, member=null, assigned={}, familyRequests=[];
 let undoable={}, availableAreas=[];
-let chores = [], energy = "medium", minutes = 20, activeView = "todo", planningMode = "maintain", focusRoom = "";
+let chores = [], energy = "medium", minutes = 20, activeFrequency = "daily", activeStatus = "todo", planningMode = "maintain", focusRoom = "";
 const $ = id => document.getElementById(id);
-const viewNames = {todo:"To Do",daily:"Completed Daily",weekly:"Completed Weekly",monthly:"Completed Monthly",quarterly:"Completed Quarterly",yearly:"Completed Yearly",as_needed:"Completed As Needed"};
-const viewInfo = {
- todo:"Chores never completed or whose next suggested date is today or earlier. No recorded date does not mean overdue.",
- daily:"Completed daily chores (every 1 day). They return to To Do on their next suggested date.",
- weekly:"Completed weekly and biweekly chores (every 2–14 days). They return to To Do on their next suggested date.",
- monthly:"Completed monthly chores (every 15–45 days). They return to To Do on their next suggested date.",
- quarterly:"Completed quarterly chores (every 46–120 days). They return to To Do on their next suggested date.",
- yearly:"Completed yearly and semiannual chores (more than 120 days). They return to To Do on their next suggested date.",
- as_needed:"Completed chores without a fixed interval. They have no automatic next suggested date."
+const frequencyNames = {daily:"Daily",weekly:"Weekly",biweekly:"Biweekly",monthly:"Monthly",occasional:"Occasional",as_needed:"As Needed"};
+const frequencyDescriptions = {
+ daily:"Everyday chores, organized by whether they are ready or completed.",
+ weekly:"Weekly chores, organized by whether they are ready or completed.",
+ biweekly:"Chores on roughly a two-week schedule, organized by whether they are ready or completed.",
+ monthly:"Monthly chores, organized by whether they are ready or completed.",
+ occasional:"Quarterly, semiannual, and yearly chores together. Filter by completion status below.",
+ as_needed:"Chores without a fixed schedule. Once completed, these remain Completed until undone."
 };
+function frequencyGroup(days){
+ if(days == null || days === "")return "as_needed";
+ const n=Number(days);
+ if(n===1)return "daily";
+ if(n>=2&&n<=7)return "weekly";
+ if(n>=8&&n<=14)return "biweekly";
+ if(n>=15&&n<=45)return "monthly";
+ return "occasional";
+}
+function inTrackerView(c){
+ const isReady=c.views?.todo === true;
+ return frequencyGroup(c.frequency_days)===activeFrequency && (activeStatus==="todo" ? isReady && !c.assigned_to : !isReady);
+}
 const $el = (tag, cls, text) => {const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x;};
 function showError(text){$("error").textContent=text;$("error").classList.remove("hidden");}
 function formatDate(iso){
@@ -60,8 +72,8 @@ function renderEditor(c, host){
 }
 function renderList(){
  const area=$("area").value, status=$("status").value, q=$("search").value.toLowerCase();
- const completedView = activeView !== "todo";
- const filtered=chores.filter(c=>c.views?.[activeView] && (completedView || !c.assigned_to) && (!area||c.area===area) && (!status||c.status===status) && (!q||`${c.name} ${c.area}`.toLowerCase().includes(q)));
+ const completedView = activeStatus === "completed";
+ const filtered=chores.filter(c=>inTrackerView(c) && (!area||c.area===area) && (!status||c.status===status) && (!q||`${c.name} ${c.area}`.toLowerCase().includes(q)));
  $("count").textContent=`${filtered.length} ${filtered.length===1?"chore":"chores"}`;
  const list=$("chore-list");list.replaceChildren();
  if(!filtered.length){list.append($el("p","quiet",completedView?"No chores waiting in this completed category.":"No chores in To Do right now."));return;}
@@ -116,15 +128,33 @@ function renderRecs(items){
  if(!items.length){wrap.append($el("p","quiet","No available chores fit your energy and time right now. Rest or choose another plan."));return;}
  items.forEach(c=>{let box=$el("div","recommend");box.append($el("small","",c.area),$el("b","",c.name),$el("small","",`${c.estimated_minutes} min · ${c.attributes.physical_effort} physical effort · ${c.status}`));if(familyEnabled && member){let btn=$el("button","rec-action","Claim this chore");btn.onclick=()=>familyAction("CLAIM",c.id);box.append(btn);}wrap.append(box);});
 }
-function setView(view){
- if (!Object.prototype.hasOwnProperty.call(viewNames, view)) return;
- activeView=view;
- $("tab-heading").textContent=viewNames[view];
- $("tab-explanation").textContent=viewInfo[view];
- document.querySelectorAll("[data-view]").forEach(b=>{const selected=b.dataset.view===view;b.classList.toggle("active",selected);b.setAttribute("aria-pressed",String(selected));});
+function updateTrackerView(){
+ $("tab-heading").textContent=`${frequencyNames[activeFrequency]} chores`;
+ $("tab-explanation").textContent=frequencyDescriptions[activeFrequency];
+ document.querySelectorAll("[data-frequency]").forEach(b=>{
+  const selected=b.dataset.frequency===activeFrequency;
+  b.classList.toggle("active",selected);
+  b.setAttribute("aria-pressed",String(selected));
+ });
+ document.querySelectorAll("[data-tracker-status]").forEach(b=>{
+  const selected=b.dataset.trackerStatus===activeStatus;
+  b.classList.toggle("active",selected);
+  b.setAttribute("aria-pressed",String(selected));
+ });
  $("status").value="";
- $("status").disabled=view!=="todo";
+ $("status").disabled=activeStatus!=="todo";
  renderList();
+}
+function setFrequency(frequency){
+ if(!Object.prototype.hasOwnProperty.call(frequencyNames,frequency))return;
+ activeFrequency=frequency;
+ activeStatus="todo";
+ updateTrackerView();
+}
+function setTrackerStatus(status){
+ if(status!=="todo" && status!=="completed")return;
+ activeStatus=status;
+ updateTrackerView();
 }
 async function load(){
  $("error").classList.add("hidden");
@@ -147,7 +177,10 @@ async function load(){
   const current=$("area").value,areas=availableAreas.length?availableAreas:[...new Set(chores.map(c=>c.area))].sort();
   $("area").replaceChildren(new Option("All areas",""),...areas.map(a=>new Option(a,a)));$("area").value=current;
   $("updated").textContent=`Updated ${data.as_of}`;
-  for(const view of Object.keys(viewNames)){const badge=document.querySelector(`[data-tab-count="${view}"]`);if(badge)badge.textContent=String(chores.filter(c=>c.views?.[view] && (view!=="todo" || !c.assigned_to)).length);}
+  for(const group of Object.keys(frequencyNames)){
+   const badge=document.querySelector(`[data-tab-count="${group}"]`);
+   if(badge)badge.textContent=String(chores.filter(c=>frequencyGroup(c.frequency_days)===group).length);
+  }
   const currentRoom=$("focus-room").value || focusRoom;
   $("focus-room").replaceChildren(...areas.map(a=>new Option(a,a)));
   focusRoom=areas.includes(currentRoom)?currentRoom:(areas[0]||"");$("focus-room").value=focusRoom;
@@ -166,10 +199,14 @@ $("minutes").addEventListener("change",e=>{minutes=Number(e.target.value);load()
 // Delegate clicks to the tabs container, so tab controls also work if the
 // navigation is regenerated later and event handlers are not lost.
 $("tracker-tabs").addEventListener("click",e=>{
- const button=e.target.closest("button[data-view]");
- if(button) setView(button.dataset.view);
+ const button=e.target.closest("button[data-frequency]");
+ if(button) setFrequency(button.dataset.frequency);
 });
-setView("todo");load();
+$("tracker-status").addEventListener("click",e=>{
+ const button=e.target.closest("button[data-tracker-status]");
+ if(button)setTrackerStatus(button.dataset.trackerStatus);
+});
+updateTrackerView();load();
 
 
 function renderFamily(data){
@@ -223,7 +260,11 @@ function undoButton(chore){
    await apiWrite("/api/completions/undo",{task_id:chore.id,completion_id:target.completion_id,operation_id:crypto.randomUUID()});
    await load();
    const updated=chores.find(c=>c.id===chore.id);
-   if(updated){const view=Object.keys(updated.views).find(v=>updated.views[v]);if(view)setView(view);}
+   if(updated){
+    activeFrequency=frequencyGroup(updated.frequency_days);
+    activeStatus=updated.views?.todo ? "todo" : "completed";
+    updateTrackerView();
+   }
   }catch(e){showError(e.message);btn.disabled=false;btn.textContent="Undo completion";}
  });
  return btn;
@@ -259,6 +300,9 @@ $("chore-create-form").addEventListener("submit",async event=>{
  button.disabled=true;feedback.textContent="Saving…";
  try{
   const result=await apiWrite("/api/chores",body);
-  form.reset();await load();setView("todo");feedback.textContent=`Added ${result.name} (${result.task_id}).`;
+  form.reset();await load();
+   activeFrequency=frequencyGroup(body.frequency_days);
+   activeStatus="todo";
+   updateTrackerView();feedback.textContent=`Added ${result.name} (${result.task_id}).`;
  }catch(e){feedback.textContent=e.message;}finally{button.disabled=false;}
 });
