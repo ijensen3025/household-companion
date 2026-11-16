@@ -7,6 +7,13 @@ promote it.
 
 ## New features
 
+- **Personal dashboard order:** Drag a main card using its “Move card” handle,
+  or use the up/down buttons with a keyboard or touch screen. Changes save
+  automatically per signed-in household member in the current browser's local
+  storage. This is **browser/device-local**, not cross-device sync. “Reset card
+  order” restores the default order. Welcome/stats, chores, and frequency tabs
+  are not draggable; the parents-only card remains hidden from Daughter.
+  Storage failures display a message and leave the current order usable.
 - **Undo completion:** Latest recorded completion can be undone by Ida or Husband;
   Daughter can undo only a completion credited to Daughter. Legacy imported
   completions with no author are parent-only. A confirmation prompt appears.
@@ -34,7 +41,12 @@ promote it.
 python -m pip install -r requirements.txt pytest
 python -m pytest -q
 node --check static/app.js
+node --check static/dashboard-layout.js
 ```
+
+Optional dashboard interaction tests require `pip install playwright` and a
+Chromium or Google Chrome executable on PATH. They mock the API and do not
+access live Firestore. Run `python -m pytest tests/test_dashboard_layout_browser.py -q`.
 
 ## Deployment (tagged preview; no automatic promotion)
 

@@ -1,5 +1,6 @@
 """Optional local Chromium smoke test. Mocks API; no live sheet access."""
 import json
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -28,11 +29,12 @@ try:
   browser=pw.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
   page=browser.new_page()
   html=(ROOT/'static/index.html').read_text()
-  html=html.replace('<link rel="stylesheet" href="/static/styles.css?v=1.6.0">', '<style>'+ (ROOT/'static/styles.css').read_text() +'</style>')
-  html=html.replace('<script src="/static/app.js?v=1.6.0" defer></script>', '')
+  html=re.sub(r'<link rel="stylesheet" href="/static/([^?]+)\?v=[^"]+">',
+              lambda match: '<style>'+(ROOT/'static'/match[1]).read_text()+'</style>', html)
+  html=re.sub(r'<script src="/static/[^" ]+" defer></script>', '', html)
   fake="<script>window.fetch = async function(url) { if(String(url).includes('/api/chores?')) return {ok:true,json:async()=>API_DATA}; return {ok:false,json:async()=>({detail:'not mocked'})}; }; const API_DATA = __DATA__;</script>"
   html=html.replace('</head>', fake.replace('__DATA__',json.dumps(API))+'</head>')
-  html=html.replace('</body>', '<script>'+(ROOT/'static/app.js').read_text()+'</script></body>')
+  html=html.replace('</body>', '<script>'+(ROOT/'static/dashboard-layout.js').read_text()+'</script><script>'+(ROOT/'static/app.js').read_text()+'</script></body>')
   page.set_content(html)
   page.wait_for_timeout(400)
   assert page.locator('#tab-heading').inner_text()=='Daily chores'

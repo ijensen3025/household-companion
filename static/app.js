@@ -171,6 +171,7 @@ async function load(){
   assigned=data.assigned||{};familyRequests=data.requests||[];
   undoable=data.undoable||{}; availableAreas=data.areas||[];
   renderManagement();
+  dashboardLayout.setMember(member);
   renderFamily(data);
   const values=[["Chores",data.summary.total],["Areas",data.summary.areas],["Completions",data.summary.completions]];
   $("stats").replaceChildren(...values.map(([label,val])=>{let s=$el("div","stat");s.append($el("b","",String(val)),$el("span","",label));return s;}));

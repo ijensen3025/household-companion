@@ -1,0 +1,9 @@
+#dashboard-layout-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0; font-size: .85rem; }
+#dashboard-layout-tools[hidden], .card-layout-controls[hidden] { display: none; }
+.card-layout-controls { display: flex; gap: 6px; justify-content: flex-end; margin-bottom: 12px; }
+.card-layout-controls button, #reset-dashboard-layout { border: 1px solid #b6c4b8; border-radius: 8px; padding: 6px 10px; background: #f7f8f4; color: #294737; font: inherit; cursor: pointer; }
+.card-layout-controls button:disabled { opacity: .4; cursor: default; }
+.card-layout-controls .layout-drag { cursor: grab; }
+.layout-dragging { opacity: .65; }
+.layout-drop-target { outline: 3px dashed #537c61; outline-offset: 3px; }
+.card-layout-controls button:focus-visible, #reset-dashboard-layout:focus-visible { outline: 3px solid #537c61; outline-offset: 3px; }
