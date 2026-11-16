@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f8f4">
+<title>Household Companion</title>
+<link rel="stylesheet" href="/static/styles.css?v=2.4.0">
+<script src="/static/app.js?v=2.4.0" defer></script>
+</head>
+<body>
+<div class="shell">
+<header><div class="brand"><div class="mark">⌂</div><div><div class="eyebrow">YOUR HOME, YOUR PACE</div><h1>Household Companion</h1></div></div><span id="updated">Connected to Firestore</span></header>
+<main>
+<section class="welcome">
+ <div><div class="eyebrow">TODAY'S HOUSEHOLD VIEW</div><h2>Progress without pressure.</h2><p>A little structure, without another list of obligations. Suggested dates are flexible.</p></div>
+ <div class="stats" id="stats"><div class="stat"><b>—</b><span>Chores</span></div><div class="stat"><b>—</b><span>Areas</span></div><div class="stat"><b>—</b><span>Completions</span></div></div>
+</section>
+<div id="error" class="error hidden" role="alert"></div>
+<section class="card family-panel" id="family-panel">
+ <div class="section-heading"><div><div class="eyebrow">SHARING RESPONSIBILITY</div><h2 id="family-title">Your chores &amp; requests</h2></div><p id="family-identity">Checking your Google account…</p></div>
+ <p id="family-setup" class="note"></p>
+ <div class="family-grid"><article><b>Your chores</b><div id="my-chores"><p class="quiet">Loading assignments…</p></div></article><article><b>Requests for you</b><div id="my-requests"><p class="quiet">Loading requests…</p></div></article></div>
+ <details id="family-overview"><summary>Household overview</summary><div id="family-summary" class="family-grid"></div></details>
+ 
+</section>
+<section class="planning card">
+ <div class="section-heading"><div><div class="eyebrow">A GENTLE PLAN</div><h2>What feels manageable?</h2></div><p>On weekdays, daily and weekly chores come first. On weekends, due or overdue biweekly and monthly chores take priority.</p></div>
+ <div class="controls"><fieldset><legend>Energy level</legend><div class="pills" id="energy"><button data-energy="low">🌱 Low</button><button data-energy="medium" class="selected">🌤️ Medium</button><button data-energy="high">☀️ High</button></div></fieldset><fieldset><legend>Cleaning mode</legend><div class="pills" id="cleaning-mode"><button data-mode="maintain" class="selected">Maintain the house</button><button data-mode="room">Focus on a room</button></div></fieldset><label id="room-filter" hidden>Choose room<select id="focus-room"></select></label><label class="minutes">Time available<select id="minutes"><option value="10">10 minutes</option><option value="20" selected>20 minutes</option><option value="30">30 minutes</option><option value="60">60 minutes</option></select></label></div>
+ <div id="recommendations" class="recs"><p class="quiet">Loading suggestions…</p></div>
+ <p class="note">Recommendations follow chore frequency and your available energy and time. Due or overdue biweekly/monthly chores get a weekend boost; chores never completed do not. Recommendations are not assignments.</p>
+</section>
+<section class="card" id="chore-management" hidden>
+ <div class="section-heading"><div><div class="eyebrow">PARENTS ONLY</div><h2>Add chores &amp; areas</h2></div><p>New chores start in To Do with no completion history.</p></div>
+ <div class="management-grid">
+  <form id="area-create-form" class="manage-form">
+   <h3>Create household area</h3>
+   <label>Area name<input name="name" maxlength="70" required placeholder="e.g., Front porch"></label>
+   <button type="submit" class="complete">Add area</button>
+   <p id="area-form-feedback" class="note" aria-live="polite"></p>
+  </form>
+  <form id="chore-create-form" class="manage-form">
+   <h3>Add a chore</h3>
+   <label>Chore name<input name="name" maxlength="100" required placeholder="e.g., Wash windows"></label>
+   <label>Household area<select name="area" id="new-chore-area" required></select></label>
+   <label>Frequency<select name="frequency_days" required>
+    <option value="1">Daily</option><option value="7">Weekly</option><option value="14">Biweekly (14 days)</option>
+    <option value="30">Monthly (30 days)</option><option value="60">Every 2 months</option>
+    <option value="90">Quarterly (90 days)</option><option value="180">Semiannually (180 days)</option>
+    <option value="365">Yearly (365 days)</option><option value="as_needed">As needed</option></select></label>
+   <label>Estimated minutes<input name="estimated_minutes" type="number" min="1" max="240" value="10" required></label>
+   <label>Physical effort<select name="physical_effort"><option>Low</option><option>Medium</option><option>High</option></select></label>
+   <label>Mental effort<select name="mental_effort"><option>Low</option><option>Medium</option><option>High</option></select></label>
+   <label>Age suitability<select name="age_suitability"><option>Adults only</option><option>Child with supervision</option><option>All ages</option><option>Child-specific</option></select></label>
+   <button type="submit" class="complete">Add chore</button>
+   <p id="chore-form-feedback" class="note" aria-live="polite"></p>
+  </form>
+ </div>
+</section>
+<section class="card tasks"><div class="section-heading"><div><div class="eyebrow">YOUR TRACKER</div><h2 id="tab-heading">To Do</h2></div><p id="count"></p></div>
+<nav class="tracker-tabs" id="tracker-tabs" aria-label="Household chore views">
+ <button type="button" class="tab active" data-view="todo" aria-pressed="true">To Do <span data-tab-count="todo"></span></button>
+ <button type="button" class="tab" data-view="daily" aria-pressed="false">Completed Daily <span data-tab-count="daily"></span></button>
+ <button type="button" class="tab" data-view="weekly" aria-pressed="false">Completed Weekly <span data-tab-count="weekly"></span></button>
+ <button type="button" class="tab" data-view="monthly" aria-pressed="false">Completed Monthly <span data-tab-count="monthly"></span></button>
+ <button type="button" class="tab" data-view="quarterly" aria-pressed="false">Completed Quarterly <span data-tab-count="quarterly"></span></button>
+ <button type="button" class="tab" data-view="yearly" aria-pressed="false">Completed Yearly <span data-tab-count="yearly"></span></button>
+ <button type="button" class="tab" data-view="as_needed" aria-pressed="false">Completed As Needed <span data-tab-count="as_needed"></span></button>
+</nav>
+<p id="tab-explanation" class="tab-explanation">Chores never recorded or ready again today. Completed chores appear in one frequency-based tab until their next suggested date.</p>
+<div class="filters"><input id="search" type="search" placeholder="Search chores…" aria-label="Search chores"><select id="area" aria-label="Filter area"><option value="">All areas</option></select><select id="status" aria-label="Filter status"><option value="">All statuses</option><option>Overdue</option><option>Suggested today</option><option>Upcoming</option><option>Not established</option><option>As needed</option></select></div>
+
+<div id="chore-list" class="chore-list" aria-live="polite"><p class="quiet">Loading chores…</p></div></section>
+</main><footer>Household Companion v2.4 • Firestore is the primary database</footer>
+</div>
+</body>
+</html>

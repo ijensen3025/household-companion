@@ -1,0 +1,4 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+google-cloud-firestore>=2.21,<3
+PyJWT[crypto]>=2.9,<3

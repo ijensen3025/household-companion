@@ -1,0 +1,11 @@
+.git
+.venv
+__pycache__
+.pytest_cache
+*.pyc
+.env
+*credentials*.json
+*.xlsx
+household-snapshot.json
+tests
+scripts

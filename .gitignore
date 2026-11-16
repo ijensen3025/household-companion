@@ -1,0 +1,21 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment variables and credentials
+.env
+.env.*
+!.env.example
+*credentials*.json
+*service-account*.json
+*.key
+
+# macOS
+.DS_Store
+
+# Local development
+.coverage
+htmlcov/
